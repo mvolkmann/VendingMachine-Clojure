@@ -197,8 +197,6 @@
     
 ;---------------------------------------------------------------------------
  
-; TODO: Consider changing this to call functions with eval
-; TODO: to be more like the Ruby version.
 (defn command [cmd]
   "processes a command string"
   (condp = cmd
@@ -225,5 +223,5 @@
     (print "> ") (flush)
     (let [cmd (read-line)]
       (command cmd)
-      (when-not (or (= cmd "exit") (= cmd "quit"))
+      (when-not (#{"exit" "quit"} cmd)
         (recur)))))
