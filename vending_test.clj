@@ -1,3 +1,8 @@
+; These are tests for an implementation of the Vending Machine specification
+; from the St. Louis Lambda Lounge.  See the "specification" link at
+; http://groups.google.com/group/lambda-lounge/web/language-shootout
+; author: R. Mark Volkmann, Object Computing, Inc.
+
 (use 'clojure.contrib.test-is)
 (use 'com.ociweb.vending)
 

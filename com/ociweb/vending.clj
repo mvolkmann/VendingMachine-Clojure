@@ -1,6 +1,7 @@
-; This is a Clojure implementation of the "Vending Machine Specification".
-; See the "specification" link near the top of
-; http://groups.google.com/group/lambda-lounge/web/language-shootout.
+; This is an implementation of the Vending Machine specification
+; from the St. Louis Lambda Lounge.  See the "specification" link at
+; http://groups.google.com/group/lambda-lounge/web/language-shootout
+; author: R. Mark Volkmann, Object Computing, Inc.
 
 (ns com.ociweb.vending
   (:use [clojure.contrib.seq-utils :only (find-first)]))
@@ -15,7 +16,7 @@
 
 (def amount-inserted-ref (ref 0.0))
 
-; key is item selector and value is item
+; key is item selector and value is an item-struct
 (def item-map-ref (ref (sorted-map)))
 
 ; key is money denomination and value is quantity
@@ -38,7 +39,9 @@
 (defn money-string [value quantity]
   (str quantity " " (money-name value) (when (> quantity 1) "s")))
 
-(defn remove-coin [money-map value]
+(defn remove-coin
+  "returns a new map with th egiven coin removed"
+  [money-map value]
   (let [quantity (money-map value)]
     (condp = quantity
       nil (throw (RuntimeException.
@@ -51,7 +54,9 @@
 
 (declare make-change)
 
-(defn make-change-internal [amount money-map change value]
+(defn make-change-internal
+  "returns true if successful and false if it couldn't make correct change."
+  [amount money-map change value]
   (cond
     (nearly-equal value amount) (conj change value)
     (< value amount)
@@ -83,30 +88,27 @@
   "shows the change the vending machine currently holds"
   []
   (println "machine holds:")
-  ; TODO: Is there a way to loop through
-  ; TODO: all the key/value pairs like in Ruby?
-  ; TODO: Maybe loop through entry objects and destructure them.
   (doseq [[value quantity] @money-map-ref]
     (println (money-string value quantity))))
   
 (defn help
   "outputs help instructions"
   []
-  (println "Commands are:")
-  (println "  help - show this help")
-  (println "  exit or quit - exit the application")
-  (println "  change - list change available")
-  (println "  items - list items available")
-  (println "  inserted - show amount inserted")
-  (println "  return - coin return")
-  (println "  n - enter a nickel")
-  (println "  d - enter a dime")
-  (println "  q - enter a quarter")
-  (println "  1 - enter a dollar bill")
-  (println "  uppercase letter - buy item with that selector"))
+  (println "Commands are:
+  help - show this help
+  exit or quit - exit the application
+  change - list change available
+  items - list items available
+  inserted - show amount inserted
+  return - coin return
+  n - enter a nickel
+  d - enter a dime
+  q - enter a quarter
+  1 - enter a dollar bill
+  uppercase letter - buy item with that selector"))
 
 (defn coin-return
-  "returns true if successful and false if it couldn't make correct change."
+  "returns the unused money that has been inserted"
   []
   (when-let [change (make-change @amount-inserted-ref @money-map-ref)]
     (doseq [value change]
