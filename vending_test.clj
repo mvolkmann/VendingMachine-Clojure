@@ -40,10 +40,10 @@
   (output-is "q,q,d,n,A" "A\n"))
 
 (deftest buy-with-excess-change
-  (output-is "1,1,A" "A
-1
+  (output-is "1,1,A" "1
 q
 d
+A
 "))
 
 (deftest buy-with-insufficient-change
@@ -75,6 +75,12 @@ C - 4 Pepsi $1.50
 q
 q
 "))
+
+(deftest bad-change-test
+  (reset-machine)
+  (add-item "A" "Juicy Fruit" 65 1)
+  (add-money 25 1)
+  (output-is "q,q,q,A" "use correct change\n"))
 
 ; Run all the tests in the current namespace.
 (run-tests)

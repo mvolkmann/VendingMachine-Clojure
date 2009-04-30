@@ -142,6 +142,7 @@
    Otherwise nil is returned."
   [amount value money-map change]
   (cond
+    (zero? amount) change
     (= value amount) (conj change value) ; success
     (< value amount) ; subtract value and try to make remaining change
       (make-change
@@ -162,12 +163,13 @@
 (defn coin-return
   "ejects the unused money that has been inserted"
   []
-  (when-let [change (make-change @amount-inserted-ref @money-map-ref)]
+  (if-let [change (make-change @amount-inserted-ref @money-map-ref)]
     (dosync
       (doseq [value change]
         (println (money-code value))
         (ref-set money-map-ref (remove-coin @money-map-ref value)))
-      (ref-set amount-inserted-ref 0))))
+      (ref-set amount-inserted-ref 0))
+    false))
 
 ;---------------------------------------------------------------------------
 
@@ -180,8 +182,7 @@
     (dosync
       (alter item-map-ref assoc selector new-item)
       (alter amount-inserted-ref - (item :price))))
-  (println selector)
-  (coin-return))
+  (println (if (coin-return) selector "use correct change")))
 
 (defn attempt-purchase
   "checks for items begin sold out or insufficient money inserted
