@@ -111,11 +111,11 @@
   "returns the unused money that has been inserted"
   []
   (when-let [change (make-change @amount-inserted-ref @money-map-ref)]
-    (doseq [value change]
-      (println (money-code value))
-      (dosync
-        (ref-set money-map-ref (remove-coin @money-map-ref value))
-        (ref-set amount-inserted-ref 0)))))
+    (dosync
+      (doseq [value change]
+        (println (money-code value))
+        (ref-set money-map-ref (remove-coin @money-map-ref value)))
+      (ref-set amount-inserted-ref 0))))
 
 (defn show-inserted
   "shows the amount of money that has been inserted and not yet spent"
