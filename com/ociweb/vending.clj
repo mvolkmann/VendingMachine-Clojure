@@ -12,7 +12,7 @@
 ; Create ref objects for all mutable state.
 ;---------------------------------------------------------------------------
 
-(def amount-inserted-ref (ref 0.0))
+(def amount-inserted-ref (ref 0))
 
 ; key is item selector and value is an item-struct
 (def item-map-ref (ref (sorted-map)))
@@ -45,13 +45,15 @@
   "fills the vending machine with initial items and money"
   []
   (reset-machine)
-  (add-item "A" "Juicy Fruit" 0.65 3)
-  (add-item "B" "Baked Lays" 1.00 2)
-  (add-item "C" "Pepsi" 1.50 4)
-  (add-money 0.05 5)
-  (add-money 0.10 3)
-  (add-money 0.25 4)
-  (add-money 1.00 2))
+  ; Prices are expressed in pennies instead of dollars
+  ; to avoid rounding issues when comparing amounts.
+  (add-item "A" "Juicy Fruit" 65 3)
+  (add-item "B" "Baked Lays" 100 2)
+  (add-item "C" "Pepsi" 150 4)
+  (add-money 5 5)
+  (add-money 10 3)
+  (add-money 25 4)
+  (add-money 100 2))
 
 ;---------------------------------------------------------------------------
 
@@ -59,7 +61,7 @@
   "returns a currency formatted string for a given dollar amount"
   [dollars]
   (let [formatter (java.text.NumberFormat/getCurrencyInstance)]
-    (.format formatter dollars)))
+    (.format formatter (/ dollars 100.0))))
 
 (defn help
   "outputs help on commands"
@@ -88,10 +90,10 @@
       (alter amount-inserted-ref + value))))
 
 (def money-code
-  {0.05 \n, 0.10 \d, 0.25 \q, 1.0 \1})
+  {5 \n, 10 \d, 25 \q, 100 \1})
     
 (def money-name
-  {0.05 "nickel", 0.10 "dime", 0.25 "quarter", 1.0 "dollar"})
+  {5 "nickel", 10 "dime", 25 "quarter", 100 "dollar"})
     
 (defn money-string [value quantity]
   (str quantity " " (money-name value) (when (> quantity 1) "s")))
@@ -119,9 +121,6 @@
   
 ;---------------------------------------------------------------------------
  
-(defn nearly-equal [v1 v2]
-  (< (Math/abs (- v1 v2)) 1e-7))
-
 (defn remove-coin
   "returns a new map with the given coin removed"
   [money-map value]
@@ -143,7 +142,7 @@
    Otherwise nil is returned."
   [amount value money-map change]
   (cond
-    (nearly-equal value amount) (conj change value) ; success
+    (= value amount) (conj change value) ; success
     (< value amount) ; subtract value and try to make remaining change
       (make-change
         (- amount value)
@@ -215,10 +214,10 @@
     "inserted" (show-inserted)
     "items" (show-items)
     "return" (coin-return)
-    "n" (insert-money 0.05)
-    "d" (insert-money 0.10)
-    "q" (insert-money 0.25)
-    "1" (insert-money 1.00)
+    "n" (insert-money 5)
+    "d" (insert-money 10)
+    "q" (insert-money 25)
+    "1" (insert-money 100)
     (select cmd)))
 
 (defn main
