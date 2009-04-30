@@ -41,7 +41,9 @@
   [value quantity]
   (dosync (alter money-map-ref assoc value quantity)))
 
-(defn fill-machine []
+(defn fill-machine
+  "fills the vending machine with initial items and money"
+  []
   (reset-machine)
   (add-item "A" "Juicy Fruit" 0.65 3)
   (add-item "B" "Baked Lays" 1.00 2)
@@ -60,7 +62,7 @@
     (.format formatter dollars)))
 
 (defn help
-  "outputs help instructions"
+  "outputs help on commands"
   []
   (println "Commands are:
   help - show this help
@@ -121,16 +123,16 @@
   (< (Math/abs (- v1 v2)) 1e-7))
 
 (defn remove-coin
-  "returns a new map with th egiven coin removed"
+  "returns a new map with the given coin removed"
   [money-map value]
   (let [quantity (money-map value)]
     (condp = quantity
       nil (throw (RuntimeException.
-                   (str "can't remove coin with value " value)))
+                   (str "no coin with value " value " to remove")))
       1 (dissoc money-map value)
       (assoc money-map value (dec quantity)))))
 
-(declare make-change)
+(declare make-change) ; needed for mutually recursive functions
 
 (defn make-change-internal
   "This attempts to make an amount of change
@@ -170,7 +172,10 @@
 
 ;---------------------------------------------------------------------------
 
-(defn purchase [selector item]
+(defn purchase
+  "makes a purchase assuming the item isn't sold out
+   and enough money was inserted"
+  [selector item]
   (let [new-quantity (dec (item :quantity))
         new-item (assoc item :quantity new-quantity)]
     (dosync
@@ -179,7 +184,10 @@
   (println selector)
   (coin-return))
 
-(defn attempt-purchase [selector item]
+(defn attempt-purchase
+  "checks for items begin sold out or insufficient money inserted
+   before making a purchase"
+  [selector item]
   (if (zero? (item :quantity))
     (println "sold out")
     (let [price (item :price)
@@ -189,7 +197,7 @@
         (purchase selector item)))))
 
 (defn select
-  "attempts to purchase the item with the given selector"
+  "verifies that a valid selector was entered and attempts a purchase"
   [selector]
   (if-let [item (@item-map-ref selector)]
     (attempt-purchase selector item)
