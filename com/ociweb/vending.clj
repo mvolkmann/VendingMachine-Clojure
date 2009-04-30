@@ -133,14 +133,14 @@
 
 (declare make-change) ; needed for mutually recursive functions
 
-(defn make-change-internal
+(defn make-change-using
   "This attempts to make an amount of change
    using a given coin value
    and the coins in money-map.
    If successful, the coins needed to make the change
    are added to the change vector and that is returned.
    Otherwise nil is returned."
-  [amount value money-map change]
+  [value amount money-map change]
   (cond
     (zero? amount) change
     (= value amount) (conj change value) ; success
@@ -156,7 +156,7 @@
     (make-change amount money-map []))
   ([amount money-map change]
      (some ; stop on first non-nil result and return it
-       #(make-change-internal amount % money-map change)
+       #(make-change-using % amount money-map change)
        ; try highest value coins first
        (reverse (keys money-map)))))
   
