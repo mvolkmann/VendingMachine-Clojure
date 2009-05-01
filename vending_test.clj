@@ -76,6 +76,24 @@ q
 q
 "))
 
+(deftest reset-machine-test
+  (reset-machine)
+  (output-is "change" "machine holds:\n")
+  (output-is "inserted" "amount inserted is $0.00\n")
+  (output-is "items" ""))
+
+(deftest add-item-test
+  (reset-machine)
+  (add-item "A" "Juicy Fruit" 65 1)
+  (output-is "items" "A - 1 Juicy Fruit $0.65\n"))
+
+(deftest add-moneytest
+  (reset-machine)
+  (add-money 25 1)
+  (output-is "change" "machine holds:
+1 quarter
+"))
+
 (deftest bad-change-test
   (reset-machine)
   (add-item "A" "Juicy Fruit" 65 1)
