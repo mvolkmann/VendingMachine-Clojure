@@ -163,13 +163,14 @@
 (defn coin-return
   "ejects the unused money that has been inserted"
   []
-  (if-let [change (make-change @amount-inserted-ref @money-map-ref)]
-    (dosync
-      (doseq [value change]
-        (println (money-code value))
-        (ref-set money-map-ref (remove-coin @money-map-ref value)))
-      (ref-set amount-inserted-ref 0))
-    false))
+  (dosync
+    (if-let [change (make-change @amount-inserted-ref @money-map-ref)]
+      (do
+        (doseq [value change]
+          (println (money-code value))
+          (ref-set money-map-ref (remove-coin @money-map-ref value)))
+        (ref-set amount-inserted-ref 0))
+      false))) ; failed to make correct change
 
 ;---------------------------------------------------------------------------
 
