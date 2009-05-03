@@ -135,30 +135,29 @@
 
 (defn make-change-using
   "This attempts to make an amount of change
-   using a given coin value
-   and the coins in money-map.
+   using a given coin value and the coins in money-map.
    If successful, the coins needed to make the change
-   are added to the change vector and that is returned.
-   Otherwise nil is returned."
-  [value amount money-map change]
+   are returned in a list.  Otherwise nil is returned.
+   A list is returned instead of a vector
+   because we want to add new coins to the end
+   and lists are more efficient than vectors for that."
+  [value amount money-map]
   (cond
-    (zero? amount) change
-    (= value amount) (conj change value) ; success
-    (< value amount) ; subtract value and try to make remaining change
-      (make-change
-        (- amount value)
-        (remove-coin money-map value)
-        (conj change value))
-    true nil)) ; failure
+    (zero? amount) '() ; no change needed
+    (= value amount) (list value) ; success
+    (> value amount) nil ; failure when value is greater than amount
+    true ; subtract value and try to make remaining change
+      (let [new-amount (- amount value)
+            new-money-map (remove-coin money-map value)
+            change (make-change new-amount new-money-map)]
+        (if change (conj change value) nil))))
 
 (defn make-change
-  ([amount money-map]
-    (make-change amount money-map []))
-  ([amount money-map change]
-    (some ; stop on first non-nil result and return it
-      #(make-change-using % amount money-map change)
-      ; try highest value coins first
-      (reverse (keys money-map)))))
+  [amount money-map]
+  (some ; stop on first non-nil result and return it
+    #(make-change-using % amount money-map)
+    ; try highest value coins first
+    (reverse (keys money-map))))
   
 (defn coin-return
   "ejects the unused money that has been inserted"
