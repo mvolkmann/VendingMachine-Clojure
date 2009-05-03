@@ -155,10 +155,10 @@
   ([amount money-map]
     (make-change amount money-map []))
   ([amount money-map change]
-     (some ; stop on first non-nil result and return it
-       #(make-change-using % amount money-map change)
-       ; try highest value coins first
-       (reverse (keys money-map)))))
+    (some ; stop on first non-nil result and return it
+      #(make-change-using % amount money-map change)
+      ; try highest value coins first
+      (reverse (keys money-map)))))
   
 (defn coin-return
   "ejects the unused money that has been inserted"
