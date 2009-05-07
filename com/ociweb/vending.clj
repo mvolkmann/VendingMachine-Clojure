@@ -118,6 +118,11 @@
       (item :quantity)
       (item :description)
       (currency (item :price)))))
+
+(defn item-quantity
+  "gets the quantity of a given item that is in the machine"
+  [selector]
+  ((@item-map-ref selector) :quantity))
   
 ;---------------------------------------------------------------------------
  
@@ -159,17 +164,18 @@
     ; try highest value coins first
     (reverse (keys money-map))))
   
+(defn eject-change [change]
+  (doseq [value change]
+    (println (money-code value))
+    (ref-set money-map-ref (remove-coin @money-map-ref value)))
+  (ref-set amount-inserted-ref 0))
+
 (defn coin-return
   "ejects the unused money that has been inserted"
   []
   (dosync
-    (if-let [change (make-change @amount-inserted-ref @money-map-ref)]
-      (do
-        (doseq [value change]
-          (println (money-code value))
-          (ref-set money-map-ref (remove-coin @money-map-ref value)))
-        (ref-set amount-inserted-ref 0))
-      false))) ; failed to make correct change
+    (when-let [change (make-change @amount-inserted-ref @money-map-ref)]
+      (eject-change change))))
 
 ;---------------------------------------------------------------------------
 
@@ -177,12 +183,18 @@
   "makes a purchase assuming the item isn't sold out
    and enough money was inserted"
   [selector item]
-  (let [new-quantity (dec (item :quantity))
-        new-item (assoc item :quantity new-quantity)]
-    (dosync
-      (alter item-map-ref assoc selector new-item)
-      (alter amount-inserted-ref - (item :price))))
-  (println (if (coin-return) selector "use correct change")))
+  (dosync
+    (let [item-price (item :price)
+          change-amount (- @amount-inserted-ref item-price)
+          change (make-change change-amount @money-map-ref)]
+      (if change
+        (let [new-quantity (dec (item :quantity))
+              new-item (assoc item :quantity new-quantity)]
+          (alter item-map-ref assoc selector new-item)
+          (alter amount-inserted-ref - (item :price))
+          (eject-change change)
+          (println selector))
+        (println "use correct change")))))
 
 (defn attempt-purchase
   "checks for items begin sold out or insufficient money inserted

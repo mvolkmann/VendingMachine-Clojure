@@ -4,8 +4,15 @@ http://groups.google.com/group/lambda-lounge/web/language-shootout
 author: R. Mark Volkmann, Object Computing, Inc.
 
 In order to run this code you must:
-- downloading and installing Clojure,
+- download and install Clojure,
+- download and install Clojure Contrib,
 - create a clj script that runs the Clojure interpreter
+  and sets the classpath to include:
+  * clojure.jar
+  * clojure-contrib.jar
+  * . (dot) so it can find com/ociweb/vending.clj
+- run from the directory that contains the com directory
+
 For help with these steps see
 http://java.ociweb.com/mark/clojure/article.html#GettingStarted
 

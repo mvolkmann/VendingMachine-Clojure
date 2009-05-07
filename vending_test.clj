@@ -98,7 +98,10 @@ q
   (reset-machine)
   (add-item "A" "Juicy Fruit" 65 1)
   (add-money 25 1)
-  (output-is "q,q,q,A" "use correct change\n"))
+  (let [expected (item-quantity "A")]
+    (output-is "q,q,q,A" "use correct change\n")
+    ; Verify that the quantity of the item didn't change.
+    (is (= expected (item-quantity "A")))))
 
 ; Run all the tests in the current namespace.
 (run-tests)
