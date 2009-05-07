@@ -94,6 +94,11 @@ q
 1 quarter
 "))
 
+(defn item-quantity
+  "gets the quantity of a given item that is in the machine"
+  [selector]
+  ((@item-map-ref selector) :quantity))
+  
 (deftest bad-change-test
   (reset-machine)
   (add-item "A" "Juicy Fruit" 65 1)

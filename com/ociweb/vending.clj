@@ -119,11 +119,6 @@
       (item :description)
       (currency (item :price)))))
 
-(defn item-quantity
-  "gets the quantity of a given item that is in the machine"
-  [selector]
-  ((@item-map-ref selector) :quantity))
-  
 ;---------------------------------------------------------------------------
  
 (defn remove-coin
@@ -165,10 +160,11 @@
     (reverse (keys money-map))))
   
 (defn eject-change [change]
-  (doseq [value change]
-    (println (money-code value))
-    (ref-set money-map-ref (remove-coin @money-map-ref value)))
-  (ref-set amount-inserted-ref 0))
+  (dosync
+    (doseq [value change]
+      (println (money-code value))
+      (alter money-map-ref remove-coin value))
+    (ref-set amount-inserted-ref 0)))
 
 (defn coin-return
   "ejects the unused money that has been inserted"
@@ -184,8 +180,7 @@
    and enough money was inserted"
   [selector item]
   (dosync
-    (let [item-price (item :price)
-          change-amount (- @amount-inserted-ref item-price)
+    (let [change-amount (- @amount-inserted-ref (item :price))
           change (make-change change-amount @money-map-ref)]
       (if change
         (let [new-quantity (dec (item :quantity))
