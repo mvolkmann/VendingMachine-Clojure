@@ -3,8 +3,7 @@
 ; http://groups.google.com/group/lambda-lounge/web/language-shootout
 ; author: R. Mark Volkmann, Object Computing, Inc.
 
-(ns com.ociweb.vending
-  (:use [clojure.contrib.seq-utils :only (find-first)]))
+(ns com.ociweb.vending)
 
 (defstruct item-struct :description :price :quantity)
 
